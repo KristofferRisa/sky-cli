@@ -3,7 +3,11 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
+	"github.com/kristofferrisa/sky-cli/internal/api"
+	"github.com/kristofferrisa/sky-cli/internal/api/met"
+	"github.com/kristofferrisa/sky-cli/internal/cache"
 	"github.com/kristofferrisa/sky-cli/internal/config"
 	"github.com/spf13/cobra"
 )
@@ -54,4 +58,35 @@ func Execute() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+}
+
+// getWeatherClient creates a weather client with optional caching
+func getWeatherClient() api.WeatherClient {
+	// Check if cache is enabled
+	if !cfg.Cache.Enabled {
+		return met.NewClient()
+	}
+
+	// Create cache directory
+	cacheDir := cfg.Cache.Directory
+	if cacheDir == "" {
+		cacheDir = os.Getenv("HOME") + "/.sky/cache"
+	}
+
+	// Create file cache
+	fileCache, err := cache.NewFileCache(cacheDir)
+	if err != nil {
+		// Fall back to no-op cache if creation fails
+		fmt.Fprintf(os.Stderr, "Warning: Failed to create cache: %v\n", err)
+		return met.NewClient()
+	}
+
+	// Get TTL from config
+	ttl := time.Duration(cfg.Cache.TTLMinutes) * time.Minute
+	if ttl == 0 {
+		ttl = 10 * time.Minute
+	}
+
+	// Return cached client
+	return met.NewCachedClient(fileCache, ttl)
 }
