@@ -1,0 +1,53 @@
+# Sky CLI Configuration File
+# Copy this file to ~/.sky/config.yaml or ~/.config/sky/config.yaml
+
+# Default location to use when no location is specified
+default_location: stavern
+
+# Default output format (currently only "full" is supported)
+default_format: full
+
+# Disable colored output (default: false)
+no_color: false
+
+# Disable emoji symbols in output (default: false)
+no_emoji: false
+
+# Saved locations
+# Add your favorite locations here for quick access
+locations:
+  stavern:
+    name: "Stavern, Norway"
+    latitude: 59.0
+    longitude: 10.0
+    timezone: "Europe/Oslo"
+
+  oslo:
+    name: "Oslo, Norway"
+    latitude: 59.9139
+    longitude: 10.7522
+    timezone: "Europe/Oslo"
+
+  bergen:
+    name: "Bergen, Norway"
+    latitude: 60.3913
+    longitude: 5.3221
+    timezone: "Europe/Oslo"
+
+  trondheim:
+    name: "Trondheim, Norway"
+    latitude: 63.4305
+    longitude: 10.3951
+    timezone: "Europe/Oslo"
+
+  home:
+    name: "Home"
+    latitude: 59.0
+    longitude: 10.0
+    timezone: "Europe/Oslo"
+
+# Usage:
+# Once configured, you can use location names:
+#   sky current oslo
+#   sky current bergen
+#   sky current home
