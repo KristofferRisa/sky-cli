@@ -24,6 +24,9 @@ type Formatter interface {
 	// FormatDailySummary formats daily summary data
 	FormatDailySummary(w io.Writer, summary *models.DailySummary, opts Options) error
 
+	// FormatDailyForecast formats multi-day forecast data
+	FormatDailyForecast(w io.Writer, dailyForecast *models.DailyForecast, opts Options) error
+
 	// Name returns the formatter name
 	Name() string
 }

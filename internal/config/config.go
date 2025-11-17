@@ -9,12 +9,20 @@ import (
 	"github.com/spf13/viper"
 )
 
+// CacheConfig represents cache configuration
+type CacheConfig struct {
+	Enabled    bool   `yaml:"enabled" mapstructure:"enabled"`
+	Directory  string `yaml:"directory" mapstructure:"directory"`
+	TTLMinutes int    `yaml:"ttl_minutes" mapstructure:"ttl_minutes"`
+}
+
 // Config represents the application configuration
 type Config struct {
-	DefaultLocation string                     `yaml:"default_location" mapstructure:"default_location"`
-	DefaultFormat   string                     `yaml:"default_format" mapstructure:"default_format"`
-	NoColor         bool                       `yaml:"no_color" mapstructure:"no_color"`
-	NoEmoji         bool                       `yaml:"no_emoji" mapstructure:"no_emoji"`
+	DefaultLocation string                      `yaml:"default_location" mapstructure:"default_location"`
+	DefaultFormat   string                      `yaml:"default_format" mapstructure:"default_format"`
+	NoColor         bool                        `yaml:"no_color" mapstructure:"no_color"`
+	NoEmoji         bool                        `yaml:"no_emoji" mapstructure:"no_emoji"`
+	Cache           CacheConfig                 `yaml:"cache" mapstructure:"cache"`
 	Locations       map[string]*models.Location `yaml:"locations" mapstructure:"locations"`
 }
 
@@ -33,6 +41,9 @@ func Load() (*Config, error) {
 	viper.SetDefault("default_format", "full")
 	viper.SetDefault("no_color", false)
 	viper.SetDefault("no_emoji", false)
+	viper.SetDefault("cache.enabled", true)
+	viper.SetDefault("cache.directory", filepath.Join(os.Getenv("HOME"), ".sky", "cache"))
+	viper.SetDefault("cache.ttl_minutes", 10)
 	viper.SetDefault("locations", map[string]*models.Location{
 		"stavern": {
 			Name:      "Stavern, Norway",

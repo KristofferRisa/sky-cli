@@ -193,5 +193,134 @@ func (c *Client) GetDailySummary(ctx context.Context, loc *models.Location) (*mo
 	summary.TemperatureAvg = totalTemp / float64(len(forecast.Hours))
 	summary.PrecipitationTotal = totalPrecip
 
+	// Find most common symbol and max wind speed
+	symbolCount := make(map[string]int)
+	maxWind := 0.0
+	for _, hour := range forecast.Hours {
+		if hour.Symbol != "" {
+			symbolCount[hour.Symbol]++
+		}
+		if hour.WindSpeed > maxWind {
+			maxWind = hour.WindSpeed
+		}
+	}
+
+	// Get most common symbol
+	maxCount := 0
+	for symbol, count := range symbolCount {
+		if count > maxCount {
+			maxCount = count
+			summary.Symbol = symbol
+		}
+	}
+	summary.WindSpeedMax = maxWind
+
 	return summary, nil
+}
+
+// GetDailyForecast calculates multi-day forecast
+func (c *Client) GetDailyForecast(ctx context.Context, loc *models.Location, days int) (*models.DailyForecast, error) {
+	// Fetch hourly data for all days (24 hours per day)
+	totalHours := days * 24
+	hourlyForecast, err := c.GetHourlyForecast(ctx, loc, totalHours)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(hourlyForecast.Hours) == 0 {
+		return nil, fmt.Errorf("no forecast data available")
+	}
+
+	dailyForecast := &models.DailyForecast{
+		Location: loc,
+		Days:     make([]models.DailySummary, 0, days),
+	}
+
+	// Group hours by day
+	currentDay := hourlyForecast.Hours[0].Time.Truncate(24 * time.Hour)
+	dayHours := []models.HourlyForecast{}
+
+	for _, hour := range hourlyForecast.Hours {
+		hourDay := hour.Time.Truncate(24 * time.Hour)
+
+		// If we've moved to a new day, process the previous day
+		if !hourDay.Equal(currentDay) {
+			if len(dayHours) > 0 {
+				summary := calculateDaySummary(loc, currentDay, dayHours)
+				dailyForecast.Days = append(dailyForecast.Days, summary)
+			}
+
+			currentDay = hourDay
+			dayHours = []models.HourlyForecast{}
+		}
+
+		dayHours = append(dayHours, hour)
+
+		// Stop if we have enough days
+		if len(dailyForecast.Days) >= days {
+			break
+		}
+	}
+
+	// Process the last day
+	if len(dayHours) > 0 && len(dailyForecast.Days) < days {
+		summary := calculateDaySummary(loc, currentDay, dayHours)
+		dailyForecast.Days = append(dailyForecast.Days, summary)
+	}
+
+	return dailyForecast, nil
+}
+
+// calculateDaySummary calculates summary for a single day from hourly data
+func calculateDaySummary(loc *models.Location, date time.Time, hours []models.HourlyForecast) models.DailySummary {
+	if len(hours) == 0 {
+		return models.DailySummary{Location: loc, Date: date}
+	}
+
+	summary := models.DailySummary{
+		Location: loc,
+		Date:     date,
+	}
+
+	// Calculate statistics
+	minTemp := hours[0].Temperature
+	maxTemp := hours[0].Temperature
+	totalTemp := 0.0
+	totalPrecip := 0.0
+	maxWind := 0.0
+	symbolCount := make(map[string]int)
+
+	for _, hour := range hours {
+		if hour.Temperature < minTemp {
+			minTemp = hour.Temperature
+		}
+		if hour.Temperature > maxTemp {
+			maxTemp = hour.Temperature
+		}
+		if hour.WindSpeed > maxWind {
+			maxWind = hour.WindSpeed
+		}
+		totalTemp += hour.Temperature
+		totalPrecip += hour.Precipitation
+		if hour.Symbol != "" {
+			symbolCount[hour.Symbol]++
+		}
+	}
+
+	summary.TemperatureMin = minTemp
+	summary.TemperatureMax = maxTemp
+	summary.TemperatureAvg = totalTemp / float64(len(hours))
+	summary.PrecipitationTotal = totalPrecip
+	summary.WindSpeedMax = maxWind
+
+	// Find most common symbol
+	maxCount := 0
+	for symbol, count := range symbolCount {
+		if count > maxCount {
+			maxCount = count
+			summary.Symbol = symbol
+		}
+	}
+
+	return summary
 }

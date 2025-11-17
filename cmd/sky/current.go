@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/kristofferrisa/sky-cli/internal/api/met"
 	"github.com/kristofferrisa/sky-cli/internal/formatter"
 	"github.com/kristofferrisa/sky-cli/internal/models"
 	"github.com/spf13/cobra"
@@ -14,12 +13,13 @@ import (
 
 var (
 	// Current command flags
-	locationName string
-	latitude     float64
-	longitude    float64
-	showForecast bool
-	showSummary  bool
+	locationName  string
+	latitude      float64
+	longitude     float64
+	showForecast  bool
+	showSummary   bool
 	forecastHours int
+	formatType    string
 )
 
 // currentCmd represents the current command
@@ -38,7 +38,10 @@ Examples:
   sky current stavern                  # Use saved location 'stavern'
   sky current --lat 59.0 --lon 10.0   # Use coordinates
   sky current --forecast               # Include 12-hour forecast
-  sky current --summary                # Include daily summary`,
+  sky current --summary                # Include daily summary
+  sky current --format json            # JSON output
+  sky current --format summary         # Brief summary
+  sky current --format markdown        # Markdown format`,
 	RunE: runCurrent,
 }
 
@@ -49,6 +52,7 @@ func init() {
 	currentCmd.Flags().BoolVar(&showForecast, "forecast", false, "Include hourly forecast")
 	currentCmd.Flags().BoolVar(&showSummary, "summary", false, "Include daily summary")
 	currentCmd.Flags().IntVar(&forecastHours, "hours", 12, "Number of hours for forecast")
+	currentCmd.Flags().StringVarP(&formatType, "format", "f", "", "Output format (full, json, summary, markdown)")
 
 	rootCmd.AddCommand(currentCmd)
 }
@@ -63,8 +67,8 @@ func runCurrent(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Create MET client
-	client := met.NewClient()
+	// Create weather client (with caching if enabled)
+	client := getWeatherClient()
 
 	// Fetch current weather
 	weather, err := client.GetCurrentWeather(ctx, loc)
@@ -90,17 +94,31 @@ func runCurrent(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// Format and display
-	fmtr := formatter.NewFullFormatter()
+	// Determine format
+	format := formatType
+	if format == "" {
+		format = cfg.DefaultFormat
+	}
+	if format == "" {
+		format = "full"
+	}
+
+	// Get formatter
+	fmtr, err := formatter.GetFormatter(format)
+	if err != nil {
+		return err
+	}
+
+	// Format options
 	opts := formatter.Options{
 		NoColor:    cfg.NoColor,
 		NoEmoji:    cfg.NoEmoji,
 		TimeFormat: "2006-01-02 15:04:05",
 	}
 
-	// If both forecast and summary are requested, use complete format
-	if showForecast && showSummary {
-		return fmtr.FormatComplete(os.Stdout, weather, forecast, summary, opts)
+	// Special handling for full formatter with complete output
+	if fullFmt, ok := fmtr.(*formatter.FullFormatter); ok && showForecast && showSummary {
+		return fullFmt.FormatComplete(os.Stdout, weather, forecast, summary, opts)
 	}
 
 	// Otherwise, format individually

@@ -227,3 +227,48 @@ func stripString(s, remove string) string {
 	}
 	return result
 }
+
+// FormatDailyForecast formats multi-day forecast
+func (f *FullFormatter) FormatDailyForecast(w io.Writer, dailyForecast *models.DailyForecast, opts Options) error {
+	if opts.NoColor {
+		ui.DisableColors()
+	}
+
+	fmt.Fprintln(w, ui.Header(fmt.Sprintf("DAILY FORECAST (%d Days) - %s", len(dailyForecast.Days), dailyForecast.Location)))
+	fmt.Fprintf(w, "%s\n", ui.Bold("Date         Conditions            Temp (Min/Max)    Precip   Wind"))
+	fmt.Fprintln(w, "──────────────────────────────────────────────────────────────────────────────")
+
+	for _, day := range dailyForecast.Days {
+		emoji, description := ui.WeatherSymbol(day.Symbol)
+		if opts.NoEmoji {
+			emoji = ""
+			description = stripEmoji(description)
+		}
+
+		dayName := day.Date.Format("Mon Jan 2")
+
+		precipStr := ""
+		if day.PrecipitationTotal > 0 {
+			precipStr = fmt.Sprintf("%.1fmm", day.PrecipitationTotal)
+		} else {
+			precipStr = "0mm"
+		}
+
+		windStr := ""
+		if day.WindSpeedMax > 0 {
+			windStr = fmt.Sprintf("%.1fm/s", day.WindSpeedMax)
+		}
+
+		fmt.Fprintf(w, "%-12s %-20s  %.1f-%.1f°C        %-8s %s\n",
+			dayName,
+			emoji+" "+description,
+			day.TemperatureMin,
+			day.TemperatureMax,
+			precipStr,
+			windStr,
+		)
+	}
+
+	fmt.Fprintln(w)
+	return nil
+}
