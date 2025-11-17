@@ -83,10 +83,18 @@ type HourlyForecast struct {
 
 // DailySummary represents aggregated weather data for a day
 type DailySummary struct {
-	Location          *Location
-	Date              time.Time
-	TemperatureMin    float64
-	TemperatureMax    float64
-	TemperatureAvg    float64
+	Location           *Location
+	Date               time.Time
+	TemperatureMin     float64
+	TemperatureMax     float64
+	TemperatureAvg     float64
 	PrecipitationTotal float64
+	Symbol             string  // Most common symbol for the day
+	WindSpeedMax       float64 // Maximum wind speed
+}
+
+// DailyForecast represents multi-day forecast
+type DailyForecast struct {
+	Location *Location
+	Days     []DailySummary
 }

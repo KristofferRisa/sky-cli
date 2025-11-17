@@ -151,3 +151,50 @@ func (f *JSONFormatter) FormatDailySummary(w io.Writer, summary *models.DailySum
 	encoder.SetIndent("", "  ")
 	return encoder.Encode(js)
 }
+
+// FormatDailyForecast formats daily forecast as JSON
+func (f *JSONFormatter) FormatDailyForecast(w io.Writer, dailyForecast *models.DailyForecast, opts Options) error {
+	type JSONDailyForecastDay struct {
+		Date               string  `json:"date"`
+		TemperatureMin     float64 `json:"temperature_min"`
+		TemperatureMax     float64 `json:"temperature_max"`
+		TemperatureAvg     float64 `json:"temperature_avg"`
+		PrecipitationTotal float64 `json:"precipitation_total"`
+		Symbol             string  `json:"symbol"`
+		WindSpeedMax       float64 `json:"wind_speed_max"`
+	}
+
+	type JSONDailyForecastOutput struct {
+		Location *models.Location       `json:"location"`
+		Days     []JSONDailyForecastDay `json:"days"`
+		Units    JSONUnits              `json:"units"`
+	}
+
+	output := JSONDailyForecastOutput{
+		Location: dailyForecast.Location,
+		Days:     make([]JSONDailyForecastDay, len(dailyForecast.Days)),
+		Units: JSONUnits{
+			Temperature:   "celsius",
+			WindSpeed:     "meters_per_second",
+			Pressure:      "hectopascal",
+			Precipitation: "millimeters",
+			Humidity:      "percent",
+		},
+	}
+
+	for i, day := range dailyForecast.Days {
+		output.Days[i] = JSONDailyForecastDay{
+			Date:               day.Date.Format("2006-01-02"),
+			TemperatureMin:     day.TemperatureMin,
+			TemperatureMax:     day.TemperatureMax,
+			TemperatureAvg:     day.TemperatureAvg,
+			PrecipitationTotal: day.PrecipitationTotal,
+			Symbol:             day.Symbol,
+			WindSpeedMax:       day.WindSpeedMax,
+		}
+	}
+
+	encoder := json.NewEncoder(w)
+	encoder.SetIndent("", "  ")
+	return encoder.Encode(output)
+}

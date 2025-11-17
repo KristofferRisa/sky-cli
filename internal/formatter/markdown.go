@@ -94,3 +94,31 @@ func (f *MarkdownFormatter) FormatDailySummary(w io.Writer, summary *models.Dail
 
 	return nil
 }
+
+// FormatDailyForecast formats daily forecast as markdown
+func (f *MarkdownFormatter) FormatDailyForecast(w io.Writer, dailyForecast *models.DailyForecast, opts Options) error {
+	fmt.Fprintf(w, "## Daily Forecast (%d days)\n\n", len(dailyForecast.Days))
+
+	fmt.Fprintln(w, "| Date | Conditions | Temp (Min/Max) | Precip | Wind Max |")
+	fmt.Fprintln(w, "|------|-----------|----------------|--------|----------|")
+
+	for _, day := range dailyForecast.Days {
+		emoji, description := ui.WeatherSymbol(day.Symbol)
+		if opts.NoEmoji {
+			emoji = ""
+		}
+
+		fmt.Fprintf(w, "| %s | %s %s | %.1f-%.1f°C | %.1fmm | %.1fm/s |\n",
+			day.Date.Format("Mon Jan 2"),
+			emoji,
+			description,
+			day.TemperatureMin,
+			day.TemperatureMax,
+			day.PrecipitationTotal,
+			day.WindSpeedMax,
+		)
+	}
+
+	fmt.Fprintln(w)
+	return nil
+}

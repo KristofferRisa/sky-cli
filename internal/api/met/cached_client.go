@@ -110,3 +110,34 @@ func (c *CachedClient) GetDailySummary(ctx context.Context, loc *models.Location
 
 	return summary, nil
 }
+
+// GetDailyForecast fetches daily forecast with caching
+func (c *CachedClient) GetDailyForecast(ctx context.Context, loc *models.Location, days int) (*models.DailyForecast, error) {
+	key := fmt.Sprintf("weather:daily:%f:%f:%d", loc.Latitude, loc.Longitude, days)
+
+	// Try to get from cache
+	if data, err := c.cache.Get(key); err == nil {
+		var dailyForecast models.DailyForecast
+		if err := json.Unmarshal(data, &dailyForecast); err == nil {
+			// Restore location reference
+			dailyForecast.Location = loc
+			for i := range dailyForecast.Days {
+				dailyForecast.Days[i].Location = loc
+			}
+			return &dailyForecast, nil
+		}
+	}
+
+	// Fetch from API
+	dailyForecast, err := c.client.GetDailyForecast(ctx, loc, days)
+	if err != nil {
+		return nil, err
+	}
+
+	// Cache the result
+	if data, err := json.Marshal(dailyForecast); err == nil {
+		c.cache.Set(key, data, c.ttl)
+	}
+
+	return dailyForecast, nil
+}

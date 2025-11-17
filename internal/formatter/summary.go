@@ -104,3 +104,36 @@ func (f *SummaryFormatter) FormatDailySummary(w io.Writer, summary *models.Daily
 	fmt.Fprintln(w)
 	return nil
 }
+
+// FormatDailyForecast formats daily forecast as brief summaries
+func (f *SummaryFormatter) FormatDailyForecast(w io.Writer, dailyForecast *models.DailyForecast, opts Options) error {
+	if opts.NoColor {
+		ui.DisableColors()
+	}
+
+	fmt.Fprintln(w, ui.Bold(dailyForecast.Location.String()))
+	fmt.Fprintln(w, ui.Bold("Daily Forecast:"))
+
+	for _, day := range dailyForecast.Days {
+		emoji, description := ui.WeatherSymbol(day.Symbol)
+		if opts.NoEmoji {
+			emoji = ""
+			description = stripEmoji(description)
+		}
+
+		precipStr := ""
+		if day.PrecipitationTotal > 0 {
+			precipStr = fmt.Sprintf(", %.1fmm rain", day.PrecipitationTotal)
+		}
+
+		fmt.Fprintf(w, "  %s: %s %.1f-%.1f°C%s\n",
+			ui.Cyan(day.Date.Format("Mon Jan 2")),
+			emoji+" "+description,
+			day.TemperatureMin,
+			day.TemperatureMax,
+			precipStr,
+		)
+	}
+
+	return nil
+}
