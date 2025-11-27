@@ -83,6 +83,7 @@ sky current --format full            # Detailed output (default)
 ```
 
 **Flags:**
+
 - `--format, -f` - Output format (full, json, summary, markdown)
 - `--location, -l` - Location name from config
 - `--lat` - Latitude
@@ -112,6 +113,7 @@ sky forecast --format markdown       # Markdown table
 ```
 
 **Flags:**
+
 - `--format, -f` - Output format (full, json, summary, markdown)
 - `--location, -l` - Location name from config
 - `--lat` - Latitude
@@ -139,6 +141,7 @@ sky daily --format markdown     # Markdown table
 ```
 
 **Flags:**
+
 - `--format, -f` - Output format (full, json, summary, markdown)
 - `--location, -l` - Location name from config
 - `--lat` - Latitude
@@ -164,6 +167,7 @@ sky locations set-default oslo
 ```
 
 **Subcommands:**
+
 - `list` - List all saved locations
 - `add <name>` - Add a new location (requires --lat and --lon)
 - `remove <name>` - Remove a saved location
@@ -172,6 +176,7 @@ sky locations set-default oslo
 ### Global Flags
 
 Available on all commands:
+
 - `--no-color` - Disable colored output
 - `--no-emoji` - Disable emoji symbols
 - `--help, -h` - Show help for any command
@@ -237,6 +242,7 @@ Documentation-friendly markdown output, perfect for reports and sharing.
 # Weather for Stavern, Norway
 
 ## Current Conditions
+
 - **Conditions:** ☀️ Clear sky
 - **Temperature:** 1.1°C
 - **Humidity:** 70%
@@ -296,6 +302,7 @@ Sky CLI caches weather data to reduce API calls and improve performance.
 - **Automatic**: No user action needed
 
 To disable caching:
+
 ```yaml
 cache:
   enabled: false
@@ -421,6 +428,7 @@ go test ./... -v
 ```
 
 **Test Coverage:**
+
 - Models: 96.3% coverage
 - Cache: 56.7% coverage
 - 34 test cases, all passing
@@ -434,6 +442,7 @@ go run ./cmd/sky current
 ## Roadmap
 
 ### Phase 1: Core Foundation ✅ COMPLETED
+
 - [x] Basic CLI structure
 - [x] MET Norway provider
 - [x] Full formatter
@@ -441,6 +450,7 @@ go run ./cmd/sky current
 - [x] Basic configuration
 
 ### Phase 2: Enhanced Features ✅ COMPLETED
+
 - [x] JSON, Summary, Markdown formatters
 - [x] Forecast command (hourly)
 - [x] Cache layer (78x performance improvement!)
@@ -448,17 +458,22 @@ go run ./cmd/sky current
 - [x] Format selection via --format flag
 
 ### Phase 3: Extensibility ✅ COMPLETED
+
 - [x] Daily/weekly weather forecasts (up to 10 days)
 - [x] Unit tests (96% coverage for models, 57% for cache)
 - [ ] Additional weather providers (OpenWeather, Weather.gov) - deferred
 - [ ] Unit conversion (metric/imperial) - deferred
 - [ ] Weather alerts and warnings - deferred
 
-### Phase 4: Distribution (Planned)
-- [ ] CI/CD pipeline
-- [ ] Cross-platform builds
-- [ ] Homebrew formula
-- [ ] Package managers (apt, snap)
+### Phase 4: CI/CD & Distribution ✅ IN PROGRESS
+
+- [x] CI/CD pipeline (GitHub Actions)
+- [x] Automated testing workflow
+- [x] Cross-platform builds (GoReleaser)
+- [x] Automated releases with GitHub
+- [x] Version command
+- [ ] Homebrew formula (planned)
+- [ ] Package managers (apt, snap) (planned)
 
 ## Performance
 
@@ -473,7 +488,6 @@ Sky CLI is designed for speed:
 ## Credits
 
 - **Weather Data**: [MET Norway](https://www.met.no/) (Meteorologisk institutt)
-- **Inspiration**: Original bash script `weather-stavern.sh`
 - **Author**: Kristoffer Risa
 
 ## License

@@ -49,7 +49,7 @@ type JSONUnits struct {
 
 // JSONForecast is the JSON representation of forecast data
 type JSONForecast struct {
-	Location *models.Location    `json:"location"`
+	Location *models.Location     `json:"location"`
 	Hours    []JSONHourlyForecast `json:"hours"`
 }
 

@@ -4,18 +4,18 @@ import "time"
 
 // Weather represents current weather conditions at a specific location
 type Weather struct {
-	Location    *Location
-	Timestamp   time.Time
-	UpdatedAt   time.Time
-	Temperature float64 // Celsius
-	Humidity    float64 // Percentage (0-100)
-	Pressure    float64 // hPa (hectopascal)
-	CloudCover  float64 // Percentage (0-100)
-	WindSpeed   float64 // m/s
-	WindDir     float64 // degrees (0-360)
+	Location      *Location
+	Timestamp     time.Time
+	UpdatedAt     time.Time
+	Temperature   float64 // Celsius
+	Humidity      float64 // Percentage (0-100)
+	Pressure      float64 // hPa (hectopascal)
+	CloudCover    float64 // Percentage (0-100)
+	WindSpeed     float64 // m/s
+	WindDir       float64 // degrees (0-360)
 	Precipitation float64 // mm for next hour
-	Symbol      string  // Weather symbol code
-	Description string  // Human-readable description
+	Symbol        string  // Weather symbol code
+	Description   string  // Human-readable description
 }
 
 // WindDirection returns a human-readable wind direction
