@@ -1,0 +1,154 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+    - go mod verify
+
+builds:
+  - id: sky
+    main: ./cmd/sky
+    binary: sky
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+      - freebsd
+    goarch:
+      - amd64
+      - arm64
+      - '386'
+    goarm:
+      - '7'
+    ignore:
+      # macOS doesn't support 386
+      - goos: darwin
+        goarch: '386'
+      # FreeBSD: only amd64 for now
+      - goos: freebsd
+        goarch: arm64
+      - goos: freebsd
+        goarch: '386'
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+      - -X main.builtBy=goreleaser
+
+archives:
+  - id: default
+    format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - LICENSE
+      - README.md
+      - PHASE4.md
+
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - '^ci:'
+      - Merge pull request
+      - Merge branch
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: Bug Fixes
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: Performance Improvements
+      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
+      order: 2
+    - title: Others
+      order: 999
+
+release:
+  github:
+    owner: kristofferrisa
+    name: sky-cli
+  draft: false
+  prerelease: auto
+  mode: replace
+  header: |
+    ## Sky CLI {{ .Tag }}
+
+    **Full Changelog**: https://github.com/kristofferrisa/sky-cli/compare/{{ .PreviousTag }}...{{ .Tag }}
+
+    ### Installation
+
+    Download the appropriate binary for your platform from the assets below.
+
+    #### Linux / macOS
+    ```bash
+    # Download and extract
+    tar -xzf sky_{{ .Version }}_Linux_x86_64.tar.gz
+
+    # Make executable and move to PATH
+    chmod +x sky
+    sudo mv sky /usr/local/bin/
+    ```
+
+    #### Windows
+    ```powershell
+    # Extract the zip file and add to PATH
+    # Or run directly: .\sky.exe
+    ```
+
+    #### Verification
+    Verify the download using the checksums:
+    ```bash
+    sha256sum -c checksums.txt
+    ```
+  footer: |
+    **Thanks for using Sky CLI!**
+
+    Report issues at https://github.com/kristofferrisa/sky-cli/issues
+
+# Homebrew tap (future enhancement)
+# brews:
+#   - repository:
+#       owner: kristofferrisa
+#       name: homebrew-tap
+#     directory: Formula
+#     homepage: https://github.com/kristofferrisa/sky-cli
+#     description: Beautiful, fast command-line weather tool
+#     license: MIT
+#     skip_upload: auto
+
+# Snapcraft (future enhancement)
+# snapcrafts:
+#   - id: sky
+#     name: sky-cli
+#     summary: Beautiful, fast command-line weather tool
+#     description: |
+#       Sky CLI is a beautiful, fast, and extensible command-line weather tool
+#       powered by MET Norway.
+#     grade: stable
+#     confinement: strict
+#     publish: false

@@ -50,6 +50,24 @@ Powered by MET Norway (Meteorologisk institutt).`,
 func init() {
 	rootCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "Disable colored output")
 	rootCmd.PersistentFlags().BoolVar(&noEmoji, "no-emoji", false, "Disable emoji output")
+
+	// Add version command
+	rootCmd.AddCommand(versionCmd)
+}
+
+// versionCmd represents the version command
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Print version information",
+	Long:  `Print version, commit, and build information for Sky CLI.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Printf("Sky CLI %s\n", version)
+		fmt.Printf("Commit: %s\n", commit)
+		fmt.Printf("Built: %s\n", date)
+		if builtBy != "unknown" {
+			fmt.Printf("Built by: %s\n", builtBy)
+		}
+	},
 }
 
 // Execute runs the root command
