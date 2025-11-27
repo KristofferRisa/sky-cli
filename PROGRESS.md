@@ -181,7 +181,7 @@ See detailed architecture design in conversation history. Key components:
   - [ ] Windows (amd64)
 
 - [ ] Package Managers
-  - [ ] Homebrew formula
+  - [x] Homebrew formula (Available: `brew tap kristofferrisa/sky`)
   - [ ] apt repository
   - [ ] Snap package
 
@@ -199,7 +199,7 @@ See detailed architecture design in conversation history. Key components:
 ### Success Criteria
 
 - [ ] Automated releases work
-- [ ] Available on Homebrew
+- [x] Available on Homebrew (via `brew tap kristofferrisa/sky`)
 - [ ] Comprehensive documentation
 - [ ] Production quality
 

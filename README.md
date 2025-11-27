@@ -20,6 +20,27 @@ A beautiful, fast, and extensible command-line weather tool written in Go.
 
 ## Installation
 
+### macOS (Homebrew)
+
+```bash
+# Add the tap
+brew tap kristofferrisa/sky
+
+# Install Sky CLI
+brew install sky
+```
+
+### Linux / Other Platforms
+
+Download the latest release for your platform from [GitHub Releases](https://github.com/kristofferrisa/sky-cli/releases).
+
+```bash
+# Example for Linux (amd64)
+curl -LO https://github.com/kristofferrisa/sky-cli/releases/latest/download/sky_[VERSION]_Linux_x86_64.tar.gz
+tar -xzf sky_[VERSION]_Linux_x86_64.tar.gz
+sudo mv sky /usr/local/bin/
+```
+
 ### From Source
 
 ```bash

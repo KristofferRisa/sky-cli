@@ -101,14 +101,18 @@ release:
 
     ### Installation
 
+    #### macOS (Homebrew) - Recommended
+    ```bash
+    brew tap kristofferrisa/sky
+    brew install sky
+    ```
+
+    #### Linux / Other Platforms
     Download the appropriate binary for your platform from the assets below.
 
-    #### Linux / macOS
     ```bash
-    # Download and extract
+    # Example for Linux (amd64)
     tar -xzf sky_{{ .Version }}_Linux_x86_64.tar.gz
-
-    # Make executable and move to PATH
     chmod +x sky
     sudo mv sky /usr/local/bin/
     ```
@@ -129,16 +133,21 @@ release:
 
     Report issues at https://github.com/kristofferrisa/sky-cli/issues
 
-# Homebrew tap (future enhancement)
-# brews:
-#   - repository:
-#       owner: kristofferrisa
-#       name: homebrew-tap
-#     directory: Formula
-#     homepage: https://github.com/kristofferrisa/sky-cli
-#     description: Beautiful, fast command-line weather tool
-#     license: MIT
-#     skip_upload: auto
+# Homebrew tap - automatically updates on release
+brews:
+  - repository:
+      owner: kristofferrisa
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    directory: Formula
+    homepage: https://github.com/kristofferrisa/sky-cli
+    description: Beautiful, fast command-line weather tool
+    license: MIT
+    skip_upload: false
+    test: |
+      system "#{bin}/sky version"
+    install: |
+      bin.install "sky"
 
 # Snapcraft (future enhancement)
 # snapcrafts:
