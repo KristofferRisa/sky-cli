@@ -33,11 +33,12 @@ func (f *SummaryFormatter) FormatCurrent(w io.Writer, weather *models.Weather, o
 		description = stripEmoji(description)
 	}
 
-	fmt.Fprintf(w, "%s %s: %s %.1f°C, Wind: %.1f m/s %s, Humidity: %.0f%%",
+	fmt.Fprintf(w, "%s %s: %s %.1f°C (feels like %.1f°C), Wind: %.1f m/s %s, Humidity: %.0f%%",
 		ui.Bold(weather.Location.String()),
 		ui.Cyan(weather.Timestamp.Format("15:04")),
 		emoji+" "+description,
 		weather.Temperature,
+		weather.FeelsLike(),
 		weather.WindSpeed,
 		weather.WindDirection(),
 		weather.Humidity,
@@ -72,10 +73,11 @@ func (f *SummaryFormatter) FormatForecast(w io.Writer, forecast *models.Forecast
 			precip = fmt.Sprintf(", %.1fmm", hour.Precipitation)
 		}
 
-		fmt.Fprintf(w, "  %s: %s %.1f°C%s\n",
+		fmt.Fprintf(w, "  %s: %s %.1f°C (feels like %.1f°C)%s\n",
 			ui.Cyan(hour.Time.Format("15:04")),
 			emoji+" "+description,
 			hour.Temperature,
+			hour.FeelsLike(),
 			precip,
 		)
 	}

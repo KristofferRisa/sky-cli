@@ -6,6 +6,7 @@ A beautiful, fast, and extensible command-line weather tool written in Go.
 
 ## Features
 
+- **Feels Like Temperature**: Industry-standard Wind Chill and Heat Index calculations
 - **Multiple Output Formats**: Full, JSON, Summary, and Markdown formats
 - **Current Weather**: Get instant weather conditions for any location
 - **Hourly Forecasts**: Dedicated forecast command with customizable hours
@@ -218,7 +219,7 @@ Location:     Stavern, Norway (59.00°N, 10.00°E)
 Time:         Sunday, November 16, 2025 at 20:00
 
 Conditions:   ☀️ Clear sky
-Temperature:  1.1°C
+Temperature:  1.1°C (feels like -2.8°C)
 Humidity:     70%
 Wind:         2.6 m/s from NW (Northwest)
 ...
@@ -240,6 +241,7 @@ sky current --format json | jq '.temperature'
     "longitude": 10
   },
   "temperature": 1.1,
+  "feels_like": -2.8,
   "humidity": 70,
   "wind_speed": 2.6,
   "conditions": "Clear sky"
@@ -252,7 +254,7 @@ Brief one-line summaries, great for status bars and quick checks.
 
 ```bash
 sky current --format summary
-# Output: Stavern, Norway 20:00: ☀️ Clear sky 1.1°C, Wind: 2.6 m/s NW, Humidity: 70%
+# Output: Stavern, Norway 20:00: ☀️ Clear sky 1.1°C (feels like -2.8°C), Wind: 2.6 m/s NW, Humidity: 70%
 ```
 
 ### Markdown Format
@@ -265,9 +267,45 @@ Documentation-friendly markdown output, perfect for reports and sharing.
 ## Current Conditions
 
 - **Conditions:** ☀️ Clear sky
-- **Temperature:** 1.1°C
+- **Temperature:** 1.1°C (feels like -2.8°C)
 - **Humidity:** 70%
 ```
+
+## Feels Like Temperature
+
+Sky CLI calculates "feels like" temperature using industry-standard formulas that match what you see on professional weather services.
+
+### How It Works
+
+The app automatically applies the appropriate formula based on conditions:
+
+**Wind Chill** (Cold & Windy)
+- Applied when: Temperature ≤ 10°C AND wind speed > 4.8 km/h
+- Formula: North American/UK standard (adopted 2001)
+- Example: `0°C with 15 km/h wind → feels like -5°C`
+
+**Heat Index** (Hot & Humid)
+- Applied when: Temperature ≥ 27°C AND humidity > 40%
+- Formula: US National Weather Service Rothfusz regression
+- Example: `32°C with 80% humidity → feels like 41°C`
+
+**Moderate Conditions**
+- When neither formula applies, shows actual temperature
+- Example: `20°C → feels like 20°C`
+
+### Why This Matters
+
+For Norway and other cold climates, Wind Chill is especially important:
+- Shows how cold it actually *feels* on your skin
+- Helps you dress appropriately for the weather
+- Matches what you see on Yr.no and other professional services
+
+### Available in All Formats
+
+- **Full**: `Temperature: 0.2°C (feels like -3.0°C)`
+- **JSON**: `"feels_like": -3.0` field
+- **Summary**: Inline with temperature
+- **Markdown**: Listed with temperature
 
 ## Configuration
 
@@ -450,9 +488,9 @@ go test ./... -v
 
 **Test Coverage:**
 
-- Models: 96.3% coverage
+- Models: 97.5% coverage (includes Wind Chill & Heat Index calculations)
 - Cache: 56.7% coverage
-- 34 test cases, all passing
+- 51 test cases, all passing
 
 ### Running Locally
 
@@ -481,7 +519,8 @@ go run ./cmd/sky current
 ### Phase 3: Extensibility ✅ COMPLETED
 
 - [x] Daily/weekly weather forecasts (up to 10 days)
-- [x] Unit tests (96% coverage for models, 57% for cache)
+- [x] Feels Like Temperature (Wind Chill & Heat Index)
+- [x] Unit tests (97.5% coverage for models, 56.7% for cache)
 - [ ] Additional weather providers (OpenWeather, Weather.gov) - deferred
 - [ ] Unit conversion (metric/imperial) - deferred
 - [ ] Weather alerts and warnings - deferred
