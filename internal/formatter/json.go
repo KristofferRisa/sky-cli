@@ -26,6 +26,7 @@ type JSONWeather struct {
 	Timestamp     string           `json:"timestamp"`
 	UpdatedAt     string           `json:"updated_at"`
 	Temperature   float64          `json:"temperature"`
+	FeelsLike     float64          `json:"feels_like"`
 	Humidity      float64          `json:"humidity"`
 	Pressure      float64          `json:"pressure"`
 	CloudCover    float64          `json:"cloud_cover"`
@@ -57,6 +58,7 @@ type JSONForecast struct {
 type JSONHourlyForecast struct {
 	Time          string  `json:"time"`
 	Temperature   float64 `json:"temperature"`
+	FeelsLike     float64 `json:"feels_like"`
 	Humidity      float64 `json:"humidity"`
 	WindSpeed     float64 `json:"wind_speed"`
 	Precipitation float64 `json:"precipitation"`
@@ -82,6 +84,7 @@ func (f *JSONFormatter) FormatCurrent(w io.Writer, weather *models.Weather, opts
 		Timestamp:     weather.Timestamp.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:     weather.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 		Temperature:   weather.Temperature,
+		FeelsLike:     weather.FeelsLike(),
 		Humidity:      weather.Humidity,
 		Pressure:      weather.Pressure,
 		CloudCover:    weather.CloudCover,
@@ -116,6 +119,7 @@ func (f *JSONFormatter) FormatForecast(w io.Writer, forecast *models.Forecast, o
 		jf.Hours[i] = JSONHourlyForecast{
 			Time:          hour.Time.Format("2006-01-02T15:04:05Z"),
 			Temperature:   hour.Temperature,
+			FeelsLike:     hour.FeelsLike(),
 			Humidity:      hour.Humidity,
 			WindSpeed:     hour.WindSpeed,
 			Precipitation: hour.Precipitation,

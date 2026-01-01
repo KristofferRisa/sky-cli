@@ -47,7 +47,7 @@ func (f *FullFormatter) FormatCurrent(w io.Writer, weather *models.Weather, opts
 	fmt.Fprintln(w)
 
 	fmt.Fprintln(w, ui.GreenBold("Conditions:  "), emoji, description)
-	fmt.Fprintf(w, "%s  %.1f°C\n", ui.Bold("Temperature:"), weather.Temperature)
+	fmt.Fprintf(w, "%s  %.1f°C (feels like %.1f°C)\n", ui.Bold("Temperature:"), weather.Temperature, weather.FeelsLike())
 	fmt.Fprintf(w, "%s     %.0f%%\n", ui.Bold("Humidity:"), weather.Humidity)
 	fmt.Fprintf(w, "%s  %.0f%%\n", ui.Bold("Cloud Cover:"), weather.CloudCover)
 	fmt.Fprintf(w, "%s %.1f mm (next hour)\n", ui.Bold("Precipitation:"), weather.Precipitation)
@@ -68,8 +68,8 @@ func (f *FullFormatter) FormatForecast(w io.Writer, forecast *models.Forecast, o
 	}
 
 	fmt.Fprintln(w, ui.Header(fmt.Sprintf("HOURLY FORECAST (Next %d Hours)", len(forecast.Hours))))
-	fmt.Fprintf(w, "%s\n", ui.Bold("Time     Temp    Symbol                Precip  Wind    Humidity"))
-	fmt.Fprintln(w, "────────────────────────────────────────────────────────────────────")
+	fmt.Fprintf(w, "%s\n", ui.Bold("Time     Temp    Feels   Symbol                Precip  Wind    Humidity"))
+	fmt.Fprintln(w, "────────────────────────────────────────────────────────────────────────────────")
 
 	for _, hour := range forecast.Hours {
 		_, description := ui.WeatherSymbol(hour.Symbol)
@@ -77,9 +77,10 @@ func (f *FullFormatter) FormatForecast(w io.Writer, forecast *models.Forecast, o
 			description = stripEmoji(description)
 		}
 
-		fmt.Fprintf(w, "%-8s %-7s %-20s %-7s %-7s %.0f%%\n",
+		fmt.Fprintf(w, "%-8s %-7s %-7s %-20s %-7s %-7s %.0f%%\n",
 			hour.Time.Format("15:04"),
 			fmt.Sprintf("%.1f°C", hour.Temperature),
+			fmt.Sprintf("%.1f°C", hour.FeelsLike()),
 			description,
 			fmt.Sprintf("%.1fmm", hour.Precipitation),
 			fmt.Sprintf("%.1fm/s", hour.WindSpeed),
@@ -174,6 +175,7 @@ func (f *FullFormatter) formatStructuredData(w io.Writer, weather *models.Weathe
 
 	fmt.Fprintln(w, "CURRENT_CONDITIONS:")
 	fmt.Fprintf(w, "  temperature: %.1f°C\n", weather.Temperature)
+	fmt.Fprintf(w, "  feels_like: %.1f°C\n", weather.FeelsLike())
 	fmt.Fprintf(w, "  weather: %s\n", description)
 	fmt.Fprintf(w, "  humidity: %.0f%%\n", weather.Humidity)
 	fmt.Fprintf(w, "  wind_speed: %.1f m/s\n", weather.WindSpeed)

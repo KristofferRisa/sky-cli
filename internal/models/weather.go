@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"math"
+	"time"
+)
 
 // Weather represents current weather conditions at a specific location
 type Weather struct {
@@ -64,6 +67,12 @@ func (w *Weather) WindDescription() string {
 	}
 }
 
+// FeelsLike calculates the apparent temperature (feels like)
+// using temperature, humidity, and wind speed
+func (w *Weather) FeelsLike() float64 {
+	return calculateApparentTemperature(w.Temperature, w.Humidity, w.WindSpeed)
+}
+
 // Forecast represents hourly weather forecast data
 type Forecast struct {
 	Location *Location
@@ -79,6 +88,12 @@ type HourlyForecast struct {
 	Precipitation float64
 	Symbol        string
 	Description   string
+}
+
+// FeelsLike calculates the apparent temperature (feels like)
+// using temperature, humidity, and wind speed
+func (h *HourlyForecast) FeelsLike() float64 {
+	return calculateApparentTemperature(h.Temperature, h.Humidity, h.WindSpeed)
 }
 
 // DailySummary represents aggregated weather data for a day
@@ -97,4 +112,87 @@ type DailySummary struct {
 type DailyForecast struct {
 	Location *Location
 	Days     []DailySummary
+}
+
+// calculateApparentTemperature calculates the "feels like" temperature
+// using industry-standard formulas: Wind Chill for cold conditions,
+// Heat Index for hot/humid conditions, or actual temperature otherwise.
+//
+// Parameters:
+//   - temperature: Air temperature in °C
+//   - humidity: Relative humidity as percentage (0-100)
+//   - windSpeed: Wind speed in m/s
+//
+// Returns: Apparent temperature in °C
+func calculateApparentTemperature(temperature, humidity, windSpeed float64) float64 {
+	// Convert wind speed from m/s to km/h for Wind Chill formula
+	windKmh := windSpeed * 3.6
+
+	// Cold conditions: Use Wind Chill formula
+	// Applied when temp ≤ 10°C and wind > 4.8 km/h (> 1.33 m/s)
+	if temperature <= 10.0 && windKmh > 4.8 {
+		return calculateWindChill(temperature, windKmh)
+	}
+
+	// Hot/humid conditions: Use Heat Index formula
+	// Applied when temp ≥ 27°C and humidity > 40%
+	if temperature >= 27.0 && humidity > 40.0 {
+		return calculateHeatIndex(temperature, humidity)
+	}
+
+	// Moderate conditions: Return actual temperature
+	// No significant wind chill or heat index effect
+	return temperature
+}
+
+// calculateWindChill calculates wind chill temperature using the
+// North American and UK standard formula (adopted 2001).
+//
+// Formula: WC = 13.12 + 0.6215×T - 11.37×V^0.16 + 0.3965×T×V^0.16
+//
+// Parameters:
+//   - temperature: Air temperature in °C
+//   - windKmh: Wind speed in km/h
+//
+// Returns: Wind chill temperature in °C
+func calculateWindChill(temperature, windKmh float64) float64 {
+	// Standard Wind Chill formula
+	// WC = 13.12 + 0.6215×T - 11.37×V^0.16 + 0.3965×T×V^0.16
+	wc := 13.12 +
+		0.6215*temperature -
+		11.37*math.Pow(windKmh, 0.16) +
+		0.3965*temperature*math.Pow(windKmh, 0.16)
+
+	return wc
+}
+
+// calculateHeatIndex calculates heat index using the Rothfusz regression
+// formula used by the US National Weather Service.
+//
+// This is a simplified version that works well for typical conditions.
+// For extreme conditions, the full formula with adjustments should be used.
+//
+// Parameters:
+//   - temperature: Air temperature in °C
+//   - humidity: Relative humidity as percentage (0-100)
+//
+// Returns: Heat index in °C
+func calculateHeatIndex(temperature, humidity float64) float64 {
+	// Convert to Fahrenheit for the standard formula
+	tempF := temperature*9.0/5.0 + 32.0
+
+	// Rothfusz regression (simplified Steadman formula)
+	// Used by US National Weather Service
+	hi := -42.379 +
+		2.04901523*tempF +
+		10.14333127*humidity -
+		0.22475541*tempF*humidity -
+		6.83783e-3*tempF*tempF -
+		5.481717e-2*humidity*humidity +
+		1.22874e-3*tempF*tempF*humidity +
+		8.5282e-4*tempF*humidity*humidity -
+		1.99e-6*tempF*tempF*humidity*humidity
+
+	// Convert back to Celsius
+	return (hi - 32.0) * 5.0 / 9.0
 }

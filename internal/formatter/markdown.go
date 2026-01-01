@@ -34,7 +34,7 @@ func (f *MarkdownFormatter) FormatCurrent(w io.Writer, weather *models.Weather, 
 	fmt.Fprintln(w, "## Current Conditions")
 	fmt.Fprintln(w)
 	fmt.Fprintf(w, "- **Conditions:** %s %s\n", emoji, description)
-	fmt.Fprintf(w, "- **Temperature:** %.1f°C\n", weather.Temperature)
+	fmt.Fprintf(w, "- **Temperature:** %.1f°C (feels like %.1f°C)\n", weather.Temperature, weather.FeelsLike())
 	fmt.Fprintf(w, "- **Humidity:** %.0f%%\n", weather.Humidity)
 	fmt.Fprintf(w, "- **Cloud Cover:** %.0f%%\n", weather.CloudCover)
 	fmt.Fprintf(w, "- **Wind:** %.1f m/s from %s (%s)\n",
@@ -52,8 +52,8 @@ func (f *MarkdownFormatter) FormatCurrent(w io.Writer, weather *models.Weather, 
 func (f *MarkdownFormatter) FormatForecast(w io.Writer, forecast *models.Forecast, opts Options) error {
 	fmt.Fprintf(w, "## Hourly Forecast (%d hours)\n\n", len(forecast.Hours))
 
-	fmt.Fprintln(w, "| Time | Conditions | Temp | Precip | Wind | Humidity |")
-	fmt.Fprintln(w, "|------|-----------|------|--------|------|----------|")
+	fmt.Fprintln(w, "| Time | Conditions | Temp | Feels Like | Precip | Wind | Humidity |")
+	fmt.Fprintln(w, "|------|-----------|------|------------|--------|------|----------|")
 
 	for _, hour := range forecast.Hours {
 		emoji, description := ui.WeatherSymbol(hour.Symbol)
@@ -61,11 +61,12 @@ func (f *MarkdownFormatter) FormatForecast(w io.Writer, forecast *models.Forecas
 			emoji = ""
 		}
 
-		fmt.Fprintf(w, "| %s | %s %s | %.1f°C | %.1fmm | %.1fm/s | %.0f%% |\n",
+		fmt.Fprintf(w, "| %s | %s %s | %.1f°C | %.1f°C | %.1fmm | %.1fm/s | %.0f%% |\n",
 			hour.Time.Format("15:04"),
 			emoji,
 			description,
 			hour.Temperature,
+			hour.FeelsLike(),
 			hour.Precipitation,
 			hour.WindSpeed,
 			hour.Humidity,
