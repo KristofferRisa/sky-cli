@@ -73,7 +73,7 @@ func TestCalculateApparentTemperature(t *testing.T) {
 			name:        "Wind Chill: Cold with moderate wind",
 			temperature: -2.0,
 			humidity:    70.0,
-			windSpeed:   4.0,  // 14.4 km/h
+			windSpeed:   4.0, // 14.4 km/h
 			expected:    -6.76,
 			tolerance:   0.1,
 			description: "Typical Norwegian winter day",
@@ -274,7 +274,7 @@ func TestHourlyForecastFeelsLike(t *testing.T) {
 		{
 			name: "Wind Chill: Strong wind creates significant difference",
 			forecast: &HourlyForecast{
-				Temperature: 0.0,  // Cold enough for wind chill
+				Temperature: 0.0, // Cold enough for wind chill
 				Humidity:    60.0,
 				WindSpeed:   12.0, // 43.2 km/h - strong wind
 			},
