@@ -49,11 +49,17 @@ sudo mv sky /usr/local/bin/
 git clone https://github.com/kristofferrisa/sky-cli
 cd sky-cli
 
-# Build
+# Build using Makefile (recommended)
+make build
+
+# Or build directly with Go
 go build -o sky ./cmd/sky
 
-# Install (optional)
+# Install to system (optional)
 sudo mv sky /usr/local/bin/
+
+# Or install to GOPATH/bin
+make install
 ```
 
 ## Quick Start
@@ -467,23 +473,71 @@ sky-cli/
 
 ## Development
 
-### Building
+### Quick Start with Makefile
+
+The project includes a comprehensive Makefile for common development tasks:
 
 ```bash
-go build -o sky ./cmd/sky
+# Build the binary
+make build
+
+# Run all tests
+make test
+
+# Run tests with coverage report
+make test-coverage
+
+# Format code and run linting
+make lint
+
+# Clean up dependencies
+make tidy
+
+# Run everything (tidy, lint, test, build)
+make all
+
+# See all available commands
+make help
 ```
 
-### Running Tests
+### Development Commands
 
 ```bash
-# Run all tests
+# Quick development iteration (no build step)
+make dev
+
+# Build and test commands
+make run-current    # Build and run current weather
+make run-forecast   # Build and run forecast
+make run-daily      # Build and run daily forecast
+
+# Clean build artifacts
+make clean
+
+# Install to GOPATH/bin
+make install
+```
+
+### Direct Go Commands
+
+You can also use Go commands directly:
+
+```bash
+# Build
+go build -o sky ./cmd/sky
+
+# Run tests
 go test ./...
-
-# Run with coverage
 go test ./... -cover
-
-# Run with verbose output
 go test ./... -v
+
+# Run locally
+go run ./cmd/sky current
+
+# Format and lint
+gofmt -w .
+go vet ./...
+go mod tidy
 ```
 
 **Test Coverage:**
@@ -492,10 +546,14 @@ go test ./... -v
 - Cache: 56.7% coverage
 - 51 test cases, all passing
 
-### Running Locally
+### Release Testing
 
 ```bash
-go run ./cmd/sky current
+# Test GoReleaser configuration
+make release-check
+
+# Create a local snapshot release
+make release-snapshot
 ```
 
 ## Roadmap
